@@ -1,0 +1,23 @@
+﻿@using Dental.ViewModels
+@model DentalScanViewModel
+
+
+<div class="form-signin justify-content-center mx-auto" style="width: 800px;">
+    @Html.ActionLink($"PATIENT-{@Model.PatientId}", "Index", "Patient", new {id = Model.PatientId}, new{ style="text-decoration:none"})
+    <div class="card-body">
+        <div class="d-flex justify-content-center align-items-center">
+            <a class="align-content-md-start h2" style="text-decoration:none">SCAN @Model.Id</a>
+        </div>        
+        <svg class="bd-placeholder-img card-img-top" width="600" height="425" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+            <title>Placeholder</title>
+            <rect width="100%" height="100%" fill="#55595c"></rect>
+            <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
+        </svg>
+        <div class="d-flex justify-content-between align-items-center">
+            <p>Valid till: @Model.ValidTo?.ToString("dd.MM.yyyy")</p>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <p class="text-body-secondary">Creation date: @Model.CreationDate?.ToString("dd.MM.yyyy")</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+﻿@using Dental.ViewModels
+@model PatientViewModel
+
+@{
+    ViewData["Title"] = "Detail";
+}
+<nav class="navbar navbar-expand mx-auto w-75" style="min-width: 600px;" aria-label="Second navbar example">
+    <div class="container-fluid justify-content-between">
+        <a class="align-content-md-start fs-4" style="text-decoration:none">@Model.Name1 @Model.Name2</a>
+        <form method="post" asp-action="CreateDentalScan">            
+            <input type="hidden" id="Id" asp-for="Id" />
+            <input type="hidden" id="Name" asp-for="Name1" />
+            <input type="hidden" id="Surname" asp-for="Name2" />
+            <button type="submit" class="btn btn-primary align-content-md-end" disabled=@Model.DisableNewDentalScans>New scan</button>
+        </form>
+    </div>
+ </nav>
+
+<div class="album py-5 bg-body-tertiary justify-content-center mx-auto" style="width: 600px">
+    <div class="container">
+        <div class="form-signin cols-2 cols-sm-2 mx-auto">
+            <div class="justify-content-end">
+                @foreach (var item in Model.DentalScans)
+                {
+                    <div class="col py-2">
+                        <div class="card shadow-sm">
+                           <div class="card-body">
+                                @Html.ActionLink($"SCAN-{@item.Id}", "Index", "DentalScan", new {dentalId = item.Id, patientId = Model.Id}, new{ style="text-decoration:none"})
+                                <svg class="bd-placeholder-img card-img-top" width="325" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                    <title>Placeholder</title>
+                                    <rect width="100%" height="100%" fill="#55595c"></rect>
+                                    <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
+                                </svg>
+                                <div class="d-flex mx-auto justify-content-between align-items-center">
+                                    <p class="text-body-secondary">Valid till: @item.ValidTo?.ToString("dd.MM.yyyy")</p>
+                                    <p class="text-body-secondary">Creation date: @item.CreationDate.ToString("dd.MM.yyyy")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

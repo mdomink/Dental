@@ -1,0 +1,14 @@
+﻿@using Dental.ViewModels
+@model DentalScanViewModel
+
+<form method="post" asp-action="Create">
+    <input type="hidden" id="IdPatientId" asp-for="PatientId" />
+    <div class="form-group">
+        <label asp-for="ValidTo">Name</label>
+        <input asp-for="ValidTo" class="form-control" placeholder="Name" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create</button>
+    </div>
+
+</form>

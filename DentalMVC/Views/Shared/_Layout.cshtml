@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Dental</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Dental.styles.css" asp-append-version="true" />
+</head>
+<body class="container-fluid">
+    <main class="d-flex align-items-center py-4 bg-body-tertiary">  
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="d-flex flex-column sticky-top flex-shrink-0 p-3 bg-body-tertiary mb-auto" style="width: 280px;">
+                <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
+                    <svg class="bi pe-none me-2" width="40" height="32"></svg>
+                    <span class="fs-4">Dental</span>
+                </a>
+                <hr>                                 
+            
+                <ul class="nav nav-pills align-content-stretch flex-column mb-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                            <svg class="bi pe-none me-2" width="16" height="16"></svg>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Patients">
+                            <svg class="bi pe-none me-2" width="16" height="16"></svg>
+                            Patients
+                        </a>
+                    </li>
+                    @if (User.IsInRole("admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Users">
+                                <svg class="bi pe-none me-2" width="16" height="16"></svg>
+                                Users
+                            </a>
+                        </li>
+                    }
+                </ul>
+                <hr>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>User</strong>
+                    </a>
+                    <ul class="dropdown-menu text-small shadow">
+                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout" asp-route-id="@User.GetUserID()">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        }  
+        <div class="mx-auto justify-content-center w-75">
+            @RenderBody()
+        </div>
+    </main>      
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - Dental - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+      
+</body>
+</html>

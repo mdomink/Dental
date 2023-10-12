@@ -1,0 +1,75 @@
+﻿﻿@using Dental.ViewModels
+@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Sign up";
+}
+
+
+<div class="form-signin justify-content-center mx-auto">
+    <div class="justify-content-center mx-auto" style="width: 300px;">
+        <form asp-action="Register">
+            <p>
+                <h4>Sign up for a new account</h4>
+            </p>
+            @if (TempData["Error"] != null)
+            {
+                <div class="col-md-12 alert alert-danger">
+                    <span><b>Sorry!</b> - @TempData["Error"] </span>
+                </div>
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="EmailAddress" class="control-label"></label>
+                <input asp-for="EmailAddress" class="form-control" />
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Surname" class="control-label"></label>
+                <input asp-for="Surname" class="form-control" />
+                <span asp-validation-for="Surname" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="City" class="control-label"></label>
+                <select asp-for="City" class="form-select" asp-items="@Model.SelectCities"></select>
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="PostalCode" class="control-label"></label>
+                <select asp-for="PostalCode" class="form-select" asp-items="@Model.SelectPostalCode"></select>
+                <span asp-validation-for="PostalCode" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Street" class="control-label"></label>
+                <input asp-for="Street" class="form-control" />
+                <span asp-validation-for="Street" class="text-danger"></span>
+            </div>            
+
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ConfirmPassword" class="control-label"></label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group py-2">
+                <input class="btn btn-primary" type="submit" value="Sign in"/>
+                <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Login">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

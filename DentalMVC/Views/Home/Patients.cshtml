@@ -1,0 +1,53 @@
+﻿@model IEnumerable<PatientModel>
+
+@{
+    ViewData["Title"] = "Patients";
+}
+
+<nav class="navbar navbar-expand mx-auto w-50" style="min-width: 800px;" aria-label="Second navbar example">
+    <div class="container-fluid justify-content-between">
+        <a class="fs-4" style="text-decoration:none">Patients</a>
+        <form role="search">
+            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+        </form>
+    </div>
+ </nav>
+
+<section class="py-2 text-center container">
+    <div class="d-float">
+        <div class="mx-auto">
+            <p>
+                <a asp-controller="Patient" asp-action="Create" class="btn btn-primary my-2">Create new patient</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="album py-5 bg-body-tertiary justify-content-center mx-auto" style="width: 800px">
+    <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 g-3">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card shadow-sm" aria-label="card">
+                        <div class="card-body">
+                            <p class="d-flex justify-content-between align-items-center">
+                                @item.Name1 @item.Name2
+                                <small class="text-body-secondary">ID @item.Id</small>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <a type="button" asp-controller="Patient" asp-action="Index" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">View</a>
+                                    <a type="button" asp-controller="Patient" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                </div>
+                                <small class="text-body-secondary">
+                                    Last update: @DateTime.Now.Subtract(item.UpdateDate).ToString("dd") days ago                                
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+            }
+        </div>
+    </div>
+</div>
