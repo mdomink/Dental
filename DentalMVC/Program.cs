@@ -1,21 +1,19 @@
-using Dental.Data;
-using Dental.Interfaces;
-using Dental.Models;
-using Dental.Reposiotry;
+using DentalBusinnes.Data;
+using DentalBusiness.Interfaces;
+using DentalBusiness.Models;
+using DentalBusiness.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using RunGroopWebApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPatientRepository, PatientRepository>();
-builder.Services.AddScoped<IDentalScanRepository, DentalScanRepository>();
+builder.Services.AddScoped<IDentalBusinessRepository, DentalBusinessRepository>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("ServerConnection"));
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddIdentity<UserModel, IdentityRole>()

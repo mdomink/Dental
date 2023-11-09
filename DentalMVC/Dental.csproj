@@ -26,4 +26,8 @@
     <Folder Include="Images\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DentalBusinesss\DentalBusiness.csproj" />
+  </ItemGroup>
+
 </Project>

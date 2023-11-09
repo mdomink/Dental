@@ -1,7 +1,6 @@
-﻿using Dental.Data;
-using Dental.Interfaces;
-using Dental.Models;
-using Dental.Reposiotry;
+﻿using DentalBusiness.Interfaces;
+using DentalBusiness.Models;
+using DentalBusiness.Repository;
 using Dental.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,43 +11,71 @@ namespace Dental.Controllers
     [Authorize]
     public class PatientController : Controller
     {
-        private readonly IPatientRepository _patientRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IDentalBusinessRepository _dentalBusiness;
 
-        public PatientController(IUserRepository userRpository, IPatientRepository patientRepository) 
+        public PatientController(IDentalBusinessRepository dentalBusiness) 
         {
-            _patientRepository = patientRepository;
-            _userRepository = userRpository;
+            _dentalBusiness = dentalBusiness;
         }
 
         public async Task<IActionResult> Index(int id)
         {
-            PatientModel patient = await _patientRepository.GetByIdAsync(id);
+            PatientModel patient;
+            UserModel user;
+
+            if (!User.IsInRole("Admin"))
+            {
+                user = await _dentalBusiness.GetUserById(User.GetUserID());
+
+                patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id, user?.OutUserId);
+
+                if (patient == null)
+                {
+
+                }
+            }
+            else
+            {
+                patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id);
+            }
 
             if (patient == null)
             {
                 return RedirectToAction("Error", "Home", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
 
-            IEnumerable<DentalScanModel> dentalScans = await _patientRepository.GetAllDentalScans(id);
+            user = await _dentalBusiness.GetUserById(patient.UserId);
 
-            bool addNewDentalScan = _userRepository.EnableAddingNewDentalScan();
+            int outUserId = user.OutUserId;
 
-            PatientViewModel patientVM = new PatientViewModel { Id = patient.Id, 
-                                                                Name1 = patient.Name1, 
-                                                                Name2 = patient.Name2, 
-                                                                UserId = patient.UserId, 
-                                                                DentalScans = dentalScans, 
-                                                                LastUpdate = DateTime.Now - patient.UpdateDate,
-                                                                DisableNewDentalScans = !addNewDentalScan};
+            bool addNewDentalScan = await _dentalBusiness.EnableAddingNewDentalScan(outUserId);
+
+            IEnumerable<DentalScanModel> dentalScans = await _dentalBusiness.GetAllDentalScans(id, outUserId);
+
+            PatientViewModel patientVM = new PatientViewModel 
+            { 
+                Id = patient.Id, 
+                Name1 = patient.Name1, 
+                Name2 = patient.Name2, 
+                OutUserId = outUserId, 
+                DentalScans = dentalScans.Select(d => new DentalScanViewModel()
+                                                {
+                                                    Id = d.Id,
+                                                    PatientId = d.PatientId,
+                                                    CreationDate = d.CreationDate,
+                                                    LastUpdate = d.ModifiedDate,
+                                                    Status = d.Status
+                                                }).ToList(), 
+                LastUpdate = patient.LastUpdate,
+                DisableNewDentalScans = !addNewDentalScan
+            };
 
             return View(patientVM);
         }
 
-        [Authorize]
         public async Task<IActionResult> Detail(DentalScanViewModel dentalScanVW)
         {
-            var dentalScan = await _patientRepository.GetDentalScanById((int)dentalScanVW.PatientId, dentalScanVW.Id);
+            var dentalScan = await _dentalBusiness.GetDentalScanById((int)dentalScanVW.PatientId, dentalScanVW.Id);
 
             if(dentalScan == null)
             {
@@ -58,7 +85,7 @@ namespace Dental.Controllers
             DentalScanViewModel dentalScanVM = new DentalScanViewModel
             {
                 Id = dentalScan.Id,
-                ValidTo = dentalScan.ValidTo,
+                LastUpdate = dentalScan.ModifiedDate,
                 CreationDate = dentalScan.CreationDate,
                 Status = dentalScan.Status,
                 PatientId = dentalScan.PatientId
@@ -67,7 +94,7 @@ namespace Dental.Controllers
             return View(dentalScanVM);
         }
 
-        public IActionResult Create(int? id)
+        public IActionResult Create()
         {
             var createPatient = new PatientViewModel { };
             return View(createPatient); 
@@ -81,31 +108,79 @@ namespace Dental.Controllers
                 return View(patientVM);
             }
 
+            string userId;
+            if (!User.IsInRole("Admin"))
+            {
+                var user = _dentalBusiness.GetUserById(User.GetUserID());
+
+                userId = user.Result.Id;
+            }
+            else if(patientVM.OutUserId != null)
+            {
+                var user = _dentalBusiness.GetUserByOutId((int)patientVM.OutUserId);
+
+                if (user == null)
+                {
+                    TempData["Error"] = "No user with ID: " + patientVM.OutUserId.ToString();
+
+                    return RedirectToAction("Create");
+                }
+                userId = user.Result.Id;
+            }            
+            else
+            {
+                TempData["Error"] = "Failed to crete new patient";
+                return RedirectToAction("Create");
+            }
+
             PatientModel patientModel = new PatientModel
             {
                 Name1 = patientVM.Name1,
                 Name2 = patientVM.Name2,
-                UpdateDate = DateTime.Now
+                LastUpdate = DateTime.Now,
+                UserId = userId
             };
 
-            _patientRepository.Add(patientModel);   
-            
+            if (!_dentalBusiness.Add(patientModel))
+            {
+                TempData["Error"] = "Failed to crete new patient";
+
+                return RedirectToAction("Create");
+            }
+
             return RedirectToAction("Index", new { patientModel.Id });
         }
 
         [HttpPost]
-        public IActionResult CreateDentalScan(int id, PatientViewModel patientVM)
+        public IActionResult CreateDentalScan(PatientViewModel patientVM)
         {
             if (!ModelState.IsValid)
             {
                 View("Index", patientVM.Id);
             }
 
+            if (!User.IsInRole("Admin"))
+            {
+                var user = _dentalBusiness.GetUserById(User.GetUserID()).Result;
+
+                if(patientVM.OutUserId != user.OutUserId)
+                {
+                    TempData["Error"] = "Failed to crete new scan";
+
+                    return RedirectToAction("Index", new { patientVM.Id });
+                }
+            }
+
             DateTime dtNow = DateTime.Now;
 
-            DentalScanModel dentalScan = new DentalScanModel { CreationDate = dtNow, Status = '0', PatientId = id };          
+            DentalScanModel dentalScan = new DentalScanModel 
+            { 
+                CreationDate = dtNow, 
+                Status = '0', 
+                PatientId = patientVM.Id
+            };          
 
-            if (!_patientRepository.AddDentalScan(dentalScan))
+            if (!_dentalBusiness.Add(dentalScan, (int)patientVM.OutUserId))
             {
                 TempData["Error"] = "Failed to crete new scan";
 
@@ -117,7 +192,7 @@ namespace Dental.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var patient = await _patientRepository.GetByIdAsyncNoTracking(id);
+            var patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id);
 
             if (patient == null)
             {
@@ -126,7 +201,7 @@ namespace Dental.Controllers
 
             var patientVM = new PatientViewModel
             {
-                Id = id,
+                Id = patient.Id,
                 Name1 = patient.Name1,
                 Name2 = patient.Name2,                
             };
@@ -140,21 +215,31 @@ namespace Dental.Controllers
             if (!ModelState.IsValid)
             {
                 return View("Edit", patientVM);
-            }
+            }            
 
-            var userPatient = await _patientRepository.GetByIdAsyncNoTracking(id);
+            var userPatient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id);
 
             if(userPatient != null)
             {
+                if (!User.IsInRole("Admin"))
+                {
+                    if (userPatient.UserId != User.GetUserID())
+                    {
+                        TempData["Error"] = "Failed to save changes";
+                        return View("Edit", patientVM);
+                    }
+                }  
+                
                 var patient = new PatientModel
                 {
                     Id = id,
                     Name1 = patientVM.Name1,
                     Name2 = patientVM.Name2,
-                    UserId = userPatient.UserId
+                    UserId = userPatient.UserId,
+                    LastUpdate = DateTime.Now
                 };
 
-                if (!_patientRepository.Update(patient))
+                if (!_dentalBusiness.Update(patient))
                 {
                     TempData["Error"] = "Failed to save changes";
                     return View("Edit", patientVM);
@@ -164,13 +249,15 @@ namespace Dental.Controllers
             }
             else
             {
+                TempData["Error"] = "Failed to save changes";
                 return View(patientVM);
             }
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var patient = await _patientRepository.GetByIdAsync(id);
+            var patient = await _dentalBusiness.GetPatientByIdAsync(id);
 
             if (patient == null)
                 return View("Error");

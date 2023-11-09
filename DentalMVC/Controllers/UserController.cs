@@ -1,6 +1,6 @@
-﻿using Dental.Data;
-using Dental.Interfaces;
-using Dental.Models;
+﻿using DentalBusiness.Data;
+using DentalBusiness.Interfaces;
+using DentalBusiness.Models;
 using Dental.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,24 +8,34 @@ using System.Data;
 using System.Diagnostics;
 
 namespace Dental.Controllers
-{    
+{
+    [Authorize]
     public class UserController : Controller
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IDentalBusinessRepository _dentalRepository;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(IDentalBusinessRepository dentalRepository)
         {
-            _userRepository = userRepository;
+            _dentalRepository = dentalRepository;
         }
 
         [Authorize]
-        public async Task<IActionResult> Index(string id)
+        public async Task<IActionResult> Index(int? id)
         {
-            UserModel user = await _userRepository.GetUserById(id);
+            UserModel user;            
+
+            if (User.IsInRole("Admin") && id != null)
+            {
+                user = await _dentalRepository.GetUserByOutId(id);
+            }
+            else
+            {
+                user = await _dentalRepository.GetUserById(User.GetUserID());
+            }           
 
             DetailUserViewModel userViewModel = new DetailUserViewModel
             {
-                Id = user.Id,
+                OutUserId = user.OutUserId,
                 EmailAddress = user.Email,
                 Name = user.Name1,
                 Surname = user.Name2,
@@ -39,14 +49,14 @@ namespace Dental.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Index(string Id, DetailUserViewModel userVM)
+        public async Task<IActionResult> Index(DetailUserViewModel userVM)
         {
             if (!ModelState.IsValid)
             {
                 return View(userVM);
             }
 
-            UserModel user = await _userRepository.GetUserById(Id);
+            UserModel user = await _dentalRepository.GetUserByOutId(userVM.OutUserId);
 
             if(user != null)
             {
@@ -56,9 +66,9 @@ namespace Dental.Controllers
                 user.City = userVM.City;
                 user.PostalCode = userVM.PostalCode;
 
-                if (_userRepository.Update(user))
+                if (_dentalRepository.Update(user))
                 {
-                    return RedirectToAction("Index", new { user.Id });
+                    return RedirectToAction("Index", new { user.OutUserId });
                 }
             }            
 

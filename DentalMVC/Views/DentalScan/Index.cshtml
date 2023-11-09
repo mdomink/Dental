@@ -14,10 +14,10 @@
             <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
         </svg>
         <div class="d-flex justify-content-between align-items-center">
-            <p>Valid till: @Model.ValidTo?.ToString("dd.MM.yyyy")</p>
+            <p>@Html.DisplayName("LastUpdate") @Model.LastUpdate.ToString("dd.MM.yyyy")</p>
         </div>
         <div class="d-flex justify-content-between align-items-center">
-            <p class="text-body-secondary">Creation date: @Model.CreationDate?.ToString("dd.MM.yyyy")</p>
+            <p class="text-body-secondary">Creation date: @Model.CreationDate.ToString("dd.MM.yyyy")</p>
         </div>
     </div>
 </div>

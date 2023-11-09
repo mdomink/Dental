@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using System.Configuration;
-using Dental.Data;
-using Dental.Data.Enum;
+using DentalBusiness.Data;
+using DentalBusiness.Data.Enum;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Dental.ViewModels
 {
     abstract public class UserViewModel
     {
-        public string? Id;
+        public int OutUserId {  get; set; }
 
         [Display(Name = "Email address")]
         [Required(ErrorMessage = "Email address is required")]
@@ -45,8 +45,7 @@ namespace Dental.ViewModels
                     return new SelectListItem()
                     {
                         Text = c.City.ToString(),
-                        Value = c.PostalCode.ToString(),
-
+                        Value = c.City.ToString(),
                     };
                 });
             }            

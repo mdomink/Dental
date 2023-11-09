@@ -6,9 +6,11 @@ namespace Dental.ViewModels
     {        
         public int Id { get; set; }
 
-        public DateTime? CreationDate { get; set; }
+        public DateTime CreationDate { get; set; } = DateTime.Now;
 
-        public DateTime? ValidTo { get; set; }
+        [Display(Name ="Last update")]
+        [DisplayFormat(DataFormatString = "{0:d/M/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime LastUpdate { get; set; }
 
         public char? Status { get; set; }       
 

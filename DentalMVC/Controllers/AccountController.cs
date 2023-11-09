@@ -1,10 +1,11 @@
-﻿using Dental.Data;
-using Dental.Interfaces;
-using Dental.Models;
+﻿using DentalBusiness.Data;
+using DentalBusiness.Interfaces;
+using DentalBusiness.Models;
 using Dental.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Dental.Controllers
 {
@@ -13,7 +14,6 @@ namespace Dental.Controllers
         private readonly UserManager<UserModel> _userManager;
         private readonly SignInManager<UserModel> _signInManager;
         
-
         public AccountController(UserManager<UserModel> userManager, SignInManager<UserModel> signInManager)
         {
             _userManager = userManager;
@@ -22,6 +22,12 @@ namespace Dental.Controllers
 
         public IActionResult Login()
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                _signInManager.SignOutAsync();
+                return RedirectToAction("Login", "Account");
+            }    
+
             var response = new LoginViewModel();
             return View(response);
         }
@@ -43,7 +49,7 @@ namespace Dental.Controllers
                 {
                     var result = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, false, false);
                     if (result.Succeeded)
-                    {
+                    {                        
                         return RedirectToAction("Index", "Home");
                     }
                 }
@@ -60,11 +66,16 @@ namespace Dental.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction("Login");
         }
 
         public IActionResult Register()
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                _signInManager.SignOutAsync();
+            }
+
             var register = new RegisterViewModel();
             return View(register);
         }
@@ -108,5 +119,6 @@ namespace Dental.Controllers
 
             return RedirectToAction("Index", "Home");
         }      
+
     }
 }

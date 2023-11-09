@@ -1,5 +1,5 @@
-﻿using Dental.Interfaces;
-using Dental.Models;
+﻿using DentalBusiness.Interfaces;
+using DentalBusiness.Models;
 using Dental.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,16 +10,16 @@ namespace Dental.Controllers
     [Authorize]
     public class DentalScanController : Controller
     {
-        private readonly IDentalScanRepository _dentalScanRepository;
+        private readonly IDentalBusinessRepository _dentalRepository;
 
-        public DentalScanController(IDentalScanRepository dentalScanRepository)
+        public DentalScanController(IDentalBusinessRepository dentalRepository)
         {
-            _dentalScanRepository = dentalScanRepository;
+            _dentalRepository = dentalRepository;
         }
 
         public async Task<IActionResult> Index(int dentalId, int? patientId = null)
         {
-            var dentalScan =  await _dentalScanRepository.GetDentalScanById(dentalId, patientId);
+            var dentalScan =  await _dentalRepository.GetDentalScanById(dentalId, patientId);
 
             if(dentalScan == null)
             {
@@ -29,7 +29,7 @@ namespace Dental.Controllers
             DentalScanViewModel dentalScanVM = new DentalScanViewModel
             {
                 Id = dentalScan.Id,
-                ValidTo = dentalScan.ValidTo,
+                LastUpdate = dentalScan.ModifiedDate,
                 CreationDate = dentalScan.CreationDate,
                 Status = dentalScan.Status,
                 PatientId = dentalScan.PatientId
@@ -47,9 +47,9 @@ namespace Dental.Controllers
                 RedirectToAction("Detail", "Patient", patientVM);
             }
 
-            var dentalScan = new DentalScanModel { CreationDate = DateTime.Now, Status = '0', PatientId = id };
+            var dentalScan = new DentalScanModel { CreationDate = DateTime.Now, ModifiedDate = DateTime.Now, Status = '0', PatientId = id };
 
-            if (_dentalScanRepository.Add(dentalScan))
+            if (_dentalRepository.Add(dentalScan,(int)patientVM.OutUserId))
             {
                 //RedirectToAction("Detail", patientVM, dentalScan);
             }

@@ -1,4 +1,5 @@
-﻿using Dental.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using DentalBusiness.Models;
 
 namespace Dental.ViewModels
 {
@@ -10,12 +11,15 @@ namespace Dental.ViewModels
 
         public string Name2 { get; set; }
 
-        public TimeSpan? LastUpdate  { get; set; }
+        [Display(Name = "Last update")]
+        [DisplayFormat(DataFormatString = "{d/M/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime LastUpdate  { get; set; }
 
-        public string? UserId { get; set; }
-
-        public IEnumerable<DentalScanModel>? DentalScans { get; set; }
+        public int? OutUserId { get; set; }
 
         public bool DisableNewDentalScans { get; set; }
+
+        public IEnumerable<DentalScanViewModel>? DentalScans { get; set; }
+
     }
 }
