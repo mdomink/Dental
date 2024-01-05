@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DentalBusiness.Models
+namespace DentalDomain.Models
 {
     public class CityModel
     {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DentalBusiness.Models
+namespace DentalDomain.Models
 {
     public class DentalScanModel
     {
@@ -21,7 +21,7 @@ namespace DentalBusiness.Models
         [ForeignKey("PatientModel")]
         public int PatientId { get; set; }
 
-        public PatientModel? Patient { get; set; }
+        public PatientModel Patient { get; set; }
 
     }
 }

@@ -1,10 +1,10 @@
-﻿using DentalBusiness.Models;
+﻿using DentalDomain.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Reflection.Emit;
 
-namespace DentalBusinnes.Data
+namespace DentalDomain.Data
 {
     public class ApplicationDbContext : IdentityDbContext<UserModel>
 	{

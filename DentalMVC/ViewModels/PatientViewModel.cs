@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DentalBusiness.Models;
+using DentalDomain.Models;
 
-namespace Dental.ViewModels
+namespace DentalWeb.ViewModels
 {
     public class PatientViewModel
     {

@@ -1,4 +1,4 @@
-﻿namespace DentalBusiness.Data.Enum
+﻿namespace DentalDomain.Data.Enum
 {
     public class CityPostalCode
     {

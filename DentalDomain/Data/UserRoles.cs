@@ -1,4 +1,4 @@
-﻿namespace DentalBusiness.Data
+﻿namespace DentalDomain.Data
 {
     public static class UserRoles
     {

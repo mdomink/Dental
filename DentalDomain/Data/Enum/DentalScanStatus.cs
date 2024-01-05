@@ -1,8 +1,7 @@
-﻿namespace DentalBusiness.Data.Enum
+﻿namespace DentalDomain.Data.Enum
 {
     public enum DentalScanStatus
-    {
-      
+    {      
         Requsted,
 
     }

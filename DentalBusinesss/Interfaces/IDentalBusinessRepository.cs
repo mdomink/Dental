@@ -1,4 +1,4 @@
-﻿using DentalBusiness.Models;
+﻿using DentalDomain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,9 +23,9 @@ namespace DentalBusiness.Interfaces
 
         Task<IEnumerable<DentalScanModel>> GetAllDentalScans(int patientId, int? outUserId = null);
 
-        Task<DentalScanModel> GetDentalScanById(int dentalId, int? outUserId = null);
+        Task<DentalScanModel?> GetDentalScanById(int dentalId, int? outUserId = null);
 
-        Task<DentalScanModel> GetDentalScanByIdNoTracking(int dentalId, int? outUserId = null);
+        Task<DentalScanModel?> GetDentalScanByIdNoTracking(int dentalId, int? outUserId = null);
 
         bool Add(DentalScanModel dentalScanModel, int outUserId);
 

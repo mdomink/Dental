@@ -1,6 +1,6 @@
-﻿using DentalBusiness.Data.Enum;
+﻿using DentalDomain.Data.Enum;
 
-namespace DentalBusiness.Data
+namespace DentalDomain.Data
 {
     public static class Cities
     {

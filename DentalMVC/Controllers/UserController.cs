@@ -1,13 +1,13 @@
-﻿using DentalBusiness.Data;
+﻿using DentalDomain.Data;
 using DentalBusiness.Interfaces;
-using DentalBusiness.Models;
-using Dental.ViewModels;
+using DentalDomain.Models;
+using DentalWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Diagnostics;
 
-namespace Dental.Controllers
+namespace DentalWeb.Controllers
 {
     [Authorize]
     public class UserController : Controller

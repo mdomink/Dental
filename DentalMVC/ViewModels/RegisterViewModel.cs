@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 
-namespace Dental.ViewModels
+namespace DentalWeb.ViewModels
 {
     public class RegisterViewModel : UserViewModel
     {

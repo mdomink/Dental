@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DentalBusiness.Models
+namespace DentalDomain.Models
 {
     public class PatientModel
     {
@@ -21,6 +21,8 @@ namespace DentalBusiness.Models
         public string? UserId { get; set; }
 
         public UserModel? User { get; set; }
+
+        public virtual ICollection<DentalScanModel> DentalScans { get; set; }
 
     }
 }

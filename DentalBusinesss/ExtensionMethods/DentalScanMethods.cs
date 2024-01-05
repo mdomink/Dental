@@ -1,4 +1,4 @@
-﻿using DentalBusiness.Models;
+﻿using DentalDomain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

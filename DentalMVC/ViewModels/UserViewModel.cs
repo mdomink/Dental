@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using System.Configuration;
-using DentalBusiness.Data;
-using DentalBusiness.Data.Enum;
+using DentalDomain.Data;
+using DentalDomain.Data.Enum;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace Dental.ViewModels
+namespace DentalWeb.ViewModels
 {
     abstract public class UserViewModel
     {

@@ -1,25 +1,29 @@
 ﻿using DentalBusiness.Interfaces;
-using DentalBusiness.Models;
+using DentalDomain.Models;
 using DentalBusiness.Repository;
-using Dental.ViewModels;
+using DentalWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Dental.Controllers
+namespace DentalWeb.Controllers
 {
     [Authorize]
     public class HomeController : Controller
     {
+        private readonly UserManager<UserModel> _userManager;
         private readonly ILogger<HomeController> _logger;
         private readonly IDentalBusinessRepository _dentalReposiotry;
 
-        public HomeController(ILogger<HomeController> logger, IDentalBusinessRepository dentalRepository)
+        public HomeController(UserManager<UserModel> userManager, ILogger<HomeController> logger, IDentalBusinessRepository dentalRepository)
         {
             _logger = logger;
             _dentalReposiotry = dentalRepository;
+            _userManager = userManager;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             if (User.Identity.IsAuthenticated)
@@ -38,13 +42,23 @@ namespace Dental.Controllers
         [Authorize]
         public async Task<IActionResult> Patients(string? filterPatients)
         {
-            int? outUserID = null;
-            if (!User.IsInRole("Admin"))
+            UserModel user = await _userManager.GetUserAsync(User);
+
+            if(user == null)
             {
-                outUserID = _dentalReposiotry.GetUserById(User.GetUserID()).Result.OutUserId;
+                return RedirectToAction("Login", "Account");
             }
 
-            IEnumerable<PatientModel> lsPatients = await _dentalReposiotry.GetAllPatients(outUserID);
+            IEnumerable<PatientModel> lsPatients;
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                lsPatients = await _dentalReposiotry.GetAllPatients();
+            }
+            else
+            {
+                lsPatients = await _dentalReposiotry.GetAllPatients(user.OutUserId);
+            }
 
             if (!string.IsNullOrEmpty(filterPatients))
             {
@@ -55,25 +69,15 @@ namespace Dental.Controllers
                                                 OrderBy(p => p.Id);
             }
 
-            return View(lsPatients.Select(p => new PatientViewModel
-                                            {
-                                                Id = p.Id,
-                                                Name1 = p.Name1,
-                                                Name2 = p.Name2,
-                                                OutUserId = _dentalReposiotry.GetUserById(p.UserId).Result.OutUserId,
-                                                LastUpdate = p.LastUpdate,
-                                                DentalScans = _dentalReposiotry.
-                                                                GetAllDentalScans(p.Id, outUserID).
-                                                                Result.
-                                                                Select(d => new DentalScanViewModel()
-                                                                                {
-                                                                                    Id = d.Id,
-                                                                                    PatientId = d.PatientId,
-                                                                                    CreationDate = d.CreationDate,
-                                                                                    LastUpdate = d.ModifiedDate,
-                                                                                    Status = d.Status
-                                                                                }).ToList()
-                                            }));
+            IEnumerable<PatientViewModel> lsPatientsVM = lsPatients.Select(p => new PatientViewModel()
+            {
+                Id = p.Id,
+                Name1 = p.Name1,
+                Name2 = p.Name2,
+                LastUpdate = p.LastUpdate
+            });
+
+            return View(lsPatientsVM);
         }
 
         [Authorize(Roles = "Admin")]

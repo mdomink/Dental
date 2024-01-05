@@ -1,4 +1,4 @@
-﻿@using Dental.ViewModels
+﻿@using DentalWeb.ViewModels
 @model PatientViewModel
 
 @{
@@ -8,7 +8,7 @@
 <nav class="navbar navbar-expand mx-auto w-75" style="min-width: 600px;" aria-label="Second navbar example">
     <div class="container-fluid justify-content-between">
         <a class="align-content-md-start fs-4" style="text-decoration:none">@Model.Name1 @Model.Name2</a>
-        <form method="post" asp-action="CreateDentalScan">            
+        <form method="post" asp-controller="DentalScan" asp-action="Create">            
             <input type="hidden" id="Id" asp-for="Id" />
             <input type="hidden" id="Name" asp-for="Name1" />
             <input type="hidden" id="Surname" asp-for="Name2" />

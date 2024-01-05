@@ -1,10 +1,9 @@
-﻿using DentalBusiness.Data.Enum;
+﻿using DentalDomain.Data.Enum;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DentalBusiness.Models
+namespace DentalDomain.Models
 {
     [Index(nameof(OutUserId))]
     public class UserModel : IdentityUser
@@ -22,7 +21,9 @@ namespace DentalBusiness.Models
 
         public int PostalCode { get; set; }
 
-        public UserCategory UserCategory { get; set; }
+        public UserCategory UserCategory { get; set; } = UserCategory.Basic;
+
+        public virtual ICollection<PatientModel> Patients { get; set; }
 
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Dental
+namespace DentalWeb
 {
     public static class ClaimsPrincipalExtensions
     {

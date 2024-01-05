@@ -1,10 +1,11 @@
-using DentalBusinnes.Data;
+using DentalDomain.Data;
 using DentalBusiness.Interfaces;
-using DentalBusiness.Models;
+using DentalDomain.Models;
 using DentalBusiness.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using DentalWeb;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,11 +26,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 var app = builder.Build();
 
-//if (args.Length == 1 && args[0].ToLower() == "seeddata")
-//{
-//    await Seed.SeedUsersAndRolesAsync(app);
-//    //Seed.SeedData(app);
-//}
+
+   await Seed.SeedUsersAndRolesAsync(app);
+   //Seed.SeedData(app);
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

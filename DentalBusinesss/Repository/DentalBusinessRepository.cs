@@ -1,17 +1,12 @@
 ﻿using DentalBusiness.ExtensionMethods;
 using DentalBusiness.Interfaces;
-using DentalBusiness.Models;
-using DentalBusinnes.Data;
+using DentalDomain.Models;
+using DentalDomain.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DentalBusiness.Repository
 {
-    public class DentalBusinessRepository : IDentalBusinessRepository
+    public partial class DentalBusinessRepository : IDentalBusinessRepository
     {
         private readonly ApplicationDbContext _context;
 
@@ -20,14 +15,24 @@ namespace DentalBusiness.Repository
             _context = context;
         }
 
-        public async Task<DentalScanModel> GetDentalScanById(int dentalId, int? patientId)
+        public async Task<DentalScanModel> GetDentalScanById(int dentalId, int? outUserId = null)
         {
-            return await _context.DentalScans.FirstOrDefaultAsync(ds => ds.Id == dentalId && (ds.PatientId == patientId || patientId == null));
+            UserModel user = await GetUserByOutId(outUserId);
+
+            return await _context.DentalScans
+                        .Include(d => d.Patient)
+                        .ThenInclude(p => p.User)
+                        .FirstOrDefaultAsync(ds => ds.Id == dentalId && (user == null || ds.Patient.UserId == user.Id));
         }
 
-        public async Task<DentalScanModel> GetDentalScanByIdNoTracking(int dentalId, int? patientId)
+        public async Task<DentalScanModel> GetDentalScanByIdNoTracking(int dentalId, int? outUserId = null)
         {
-            return await _context.DentalScans.AsNoTracking().FirstOrDefaultAsync(ds => ds.Id == dentalId && (ds.PatientId == patientId || patientId == null));
+            UserModel user = await GetUserByOutId(outUserId);
+
+            return await _context.DentalScans.AsNoTracking()
+                        .Include(d => d.Patient)
+                        .ThenInclude(p => p.User)
+                        .FirstOrDefaultAsync(ds => ds.Id == dentalId && (user == null || ds.Patient.UserId == user.Id));
         }
 
         public bool Add(DentalScanModel dentalScanModel, int outUserId)
@@ -39,7 +44,9 @@ namespace DentalBusiness.Repository
                 return false;
             }
 
-            if (!EnableAddingNewDentalScan(outUserId).Result)
+            bool bAllowNewScan = EnableAddingNewDentalScan(outUserId).Result;
+
+            if (!bAllowNewScan)
             {
                 return false;
             }
@@ -58,7 +65,6 @@ namespace DentalBusiness.Repository
 
         public bool Add(PatientModel patient)
         {
-           // var user = Get
             _context.Add(patient);
 
              return Save();
@@ -68,14 +74,16 @@ namespace DentalBusiness.Repository
         {
             var user = await GetUserByOutId(outUserId);
 
-            return await _context.Patients.FirstOrDefaultAsync(p => p.Id == Id && (user == null || p.UserId == user.Id));
+            return await _context.Patients
+                        .FirstOrDefaultAsync(p => p.Id == Id && (user == null || p.UserId == user.Id));
         }
 
         public async Task<PatientModel> GetPatientByIdAsyncNoTracking(int Id, int? outUserId = null)
         {
             var user = await GetUserByOutId(outUserId);
 
-            return await _context.Patients.AsNoTracking().FirstOrDefaultAsync(p => p.Id == Id && (user == null || p.UserId == user.Id));
+            return await _context.Patients.AsNoTracking()
+                        .FirstOrDefaultAsync(p => p.Id == Id && (user == null || p.UserId == user.Id));
         }
 
         public async Task<IEnumerable<DentalScanModel>> GetAllDentalScans(int patientId, int? outUserId = null)
@@ -114,9 +122,9 @@ namespace DentalBusiness.Repository
             return await userPatients.ToListAsync();
         }
 
+        //check wether user can add more dental scans into 
         public async Task<bool> EnableAddingNewDentalScan(int outUserId)
         {
-            //return true;
             int iDentalScanCount = 0;
             var lsPatients = await GetAllPatients(outUserId);
 

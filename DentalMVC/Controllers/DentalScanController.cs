@@ -1,27 +1,47 @@
 ﻿using DentalBusiness.Interfaces;
-using DentalBusiness.Models;
-using Dental.ViewModels;
+using DentalDomain.Models;
+using DentalWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Dental.Controllers
+namespace DentalWeb.Controllers
 {
     [Authorize]
     public class DentalScanController : Controller
     {
-        private readonly IDentalBusinessRepository _dentalRepository;
+        private readonly IDentalBusinessRepository _dentalBusiness;
+        private readonly UserManager<UserModel> _userManager;
 
-        public DentalScanController(IDentalBusinessRepository dentalRepository)
+        public DentalScanController(UserManager<UserModel> userManager, IDentalBusinessRepository dentalRepository)
         {
-            _dentalRepository = dentalRepository;
+            _dentalBusiness = dentalRepository;
+            _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(int dentalId, int? patientId = null)
+        public async Task<IActionResult> Index(int dentalId)
         {
-            var dentalScan =  await _dentalRepository.GetDentalScanById(dentalId, patientId);
+            UserModel user;
+            DentalScanModel dentalScan;
 
-            if(dentalScan == null)
+            if (User.IsInRole("Admin"))
+            {
+                dentalScan = await _dentalBusiness.GetDentalScanById(dentalId);
+            }
+            else
+            {
+                user = await _dentalBusiness.GetUserById(User.GetUserID());
+
+                if (user == null)
+                {
+                    return RedirectToAction("Error", "Home", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                }
+
+                dentalScan = await _dentalBusiness.GetDentalScanById(dentalId, user.OutUserId);
+            }            
+
+            if (dentalScan == null)
             {
                 return RedirectToAction("Error", "Home", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });                
             }
@@ -36,25 +56,45 @@ namespace Dental.Controllers
             };
 
             return View(dentalScanVM);
-
         }
 
         [HttpPost]
-        public IActionResult Create(int id, PatientViewModel patientVM)
+        public IActionResult Create(PatientViewModel patientVM)
         {
             if (!ModelState.IsValid)
             {
-                RedirectToAction("Detail", "Patient", patientVM);
+                RedirectToAction("Index", "Patient", new { patientVM.Id });
             }
 
-            var dentalScan = new DentalScanModel { CreationDate = DateTime.Now, ModifiedDate = DateTime.Now, Status = '0', PatientId = id };
-
-            if (_dentalRepository.Add(dentalScan,(int)patientVM.OutUserId))
+            if (!User.IsInRole("Admin"))
             {
-                //RedirectToAction("Detail", patientVM, dentalScan);
+                var user = _userManager.GetUserAsync(User).Result;
+
+                if (patientVM.OutUserId != user.OutUserId)
+                {
+                    TempData["Error"] = "Failed to crete new scan";
+
+                    return RedirectToAction("Index", "Patient", new { patientVM.Id });
+                }
             }
 
-            return RedirectToAction("Detail", "Patient", patientVM);
+            DateTime dtNow = DateTime.Now;
+
+            DentalScanModel dentalScan = new DentalScanModel
+            {
+                CreationDate = dtNow,
+                Status = '0',
+                PatientId = patientVM.Id
+            };
+
+            if (!_dentalBusiness.Add(dentalScan, (int)patientVM.OutUserId))
+            {
+                TempData["Error"] = "Failed to crete new scan";
+
+                return RedirectToAction("Index", new { patientVM.Id });
+            }
+
+            return RedirectToAction("Index", "DentalScan", new { dentalId = dentalScan.Id, patientId = dentalScan.PatientId });
         }
     }
 }

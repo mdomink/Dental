@@ -1,21 +1,24 @@
 ﻿using DentalBusiness.Interfaces;
-using DentalBusiness.Models;
+using DentalDomain.Models;
 using DentalBusiness.Repository;
-using Dental.ViewModels;
+using DentalWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace Dental.Controllers
+namespace DentalWeb.Controllers
 {
     [Authorize]
     public class PatientController : Controller
     {
         private readonly IDentalBusinessRepository _dentalBusiness;
+        private readonly UserManager<UserModel> _userManager;
 
-        public PatientController(IDentalBusinessRepository dentalBusiness) 
+        public PatientController(UserManager<UserModel> userManager, IDentalBusinessRepository dentalBusiness) 
         {
             _dentalBusiness = dentalBusiness;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index(int id)
@@ -23,28 +26,24 @@ namespace Dental.Controllers
             PatientModel patient;
             UserModel user;
 
-            if (!User.IsInRole("Admin"))
+            if (User.IsInRole("Admin"))
             {
-                user = await _dentalBusiness.GetUserById(User.GetUserID());
+                patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id);
 
-                patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id, user?.OutUserId);
-
-                if (patient == null)
-                {
-
-                }
+                user = await _dentalBusiness.GetUserById(patient.UserId);
+                
             }
             else
             {
-                patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id);
+                user = await _userManager.GetUserAsync(User);
+
+                patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id, user.OutUserId);
             }
 
             if (patient == null)
             {
                 return RedirectToAction("Error", "Home", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-            }
-
-            user = await _dentalBusiness.GetUserById(patient.UserId);
+            }      
 
             int outUserId = user.OutUserId;
 
@@ -56,7 +55,7 @@ namespace Dental.Controllers
             { 
                 Id = patient.Id, 
                 Name1 = patient.Name1, 
-                Name2 = patient.Name2, 
+                Name2 = patient.Name2,   
                 OutUserId = outUserId, 
                 DentalScans = dentalScans.Select(d => new DentalScanViewModel()
                                                 {
@@ -101,23 +100,22 @@ namespace Dental.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(PatientViewModel patientVM)
+        public async Task<IActionResult> Create(PatientViewModel patientVM)
         {
             if (!ModelState.IsValid)
             {
                 return View(patientVM);
             }
 
-            string userId;
+            UserModel user;
+
             if (!User.IsInRole("Admin"))
             {
-                var user = _dentalBusiness.GetUserById(User.GetUserID());
-
-                userId = user.Result.Id;
+                user = await _userManager.GetUserAsync(User);
             }
             else if(patientVM.OutUserId != null)
             {
-                var user = _dentalBusiness.GetUserByOutId((int)patientVM.OutUserId);
+                user = await _dentalBusiness.GetUserByOutId((int)patientVM.OutUserId);
 
                 if (user == null)
                 {
@@ -125,13 +123,15 @@ namespace Dental.Controllers
 
                     return RedirectToAction("Create");
                 }
-                userId = user.Result.Id;
+
             }            
             else
             {
                 TempData["Error"] = "Failed to crete new patient";
                 return RedirectToAction("Create");
             }
+
+            string userId = user.Id;
 
             PatientModel patientModel = new PatientModel
             {
@@ -152,7 +152,7 @@ namespace Dental.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateDentalScan(PatientViewModel patientVM)
+        public async Task<IActionResult> CreateDentalScan(PatientViewModel patientVM)
         {
             if (!ModelState.IsValid)
             {
@@ -161,7 +161,7 @@ namespace Dental.Controllers
 
             if (!User.IsInRole("Admin"))
             {
-                var user = _dentalBusiness.GetUserById(User.GetUserID()).Result;
+                var user = await _userManager.GetUserAsync(User);
 
                 if(patientVM.OutUserId != user.OutUserId)
                 {
@@ -190,9 +190,9 @@ namespace Dental.Controllers
             return RedirectToAction("Index", "DentalScan", new { dentalId = dentalScan.Id, patientId = dentalScan.PatientId });
         }
 
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int patientId)
         {
-            var patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(id);
+            var patient = await _dentalBusiness.GetPatientByIdAsyncNoTracking(patientId);
 
             if (patient == null)
             {
