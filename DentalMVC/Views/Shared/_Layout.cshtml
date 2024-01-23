@@ -21,20 +21,20 @@
             
                 <ul class="nav nav-pills align-content-stretch flex-column mb-auto">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-route-id="" asp-action="Index">
                             <svg class="bi pe-none me-2" width="16" height="16"></svg>
                             Home
                         </a>
                     </li>
                     <li>
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Patients">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-route-id="" asp-action="Patients">
                             <svg class="bi pe-none me-2" width="16" height="16"></svg>
                             Patients
                         </a>
                     </li>
                     @if (User.IsInRole("Admin"))
                     {
-                        <li class="nav-item">
+                        <li class="nav-item"> 
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Users">
                                 <svg class="bi pe-none me-2" width="16" height="16"></svg>
                                 Users
@@ -60,7 +60,7 @@
             @RenderBody()
         </div>
     </main>      
-    <footer class="border-top footer text-muted">
+    <footer class="footer fixed-bottom bg-light text-center p-2">
         <div class="container">
             &copy; 2023 - Dental - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>

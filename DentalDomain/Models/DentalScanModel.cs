@@ -21,7 +21,7 @@ namespace DentalDomain.Models
         [ForeignKey("PatientModel")]
         public int PatientId { get; set; }
 
-        public PatientModel Patient { get; set; }
+        public PatientModel? Patient { get; set; }
 
     }
 }

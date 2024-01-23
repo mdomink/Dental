@@ -12,9 +12,9 @@ namespace DentalWeb.Controllers
     [Authorize]
     public class UserController : Controller
     {
-        private readonly IDentalBusinessRepository _dentalRepository;
+        private readonly IDentalBL _dentalRepository;
 
-        public UserController(IDentalBusinessRepository dentalRepository)
+        public UserController(IDentalBL dentalRepository)
         {
             _dentalRepository = dentalRepository;
         }
@@ -26,7 +26,7 @@ namespace DentalWeb.Controllers
 
             if (User.IsInRole("Admin") && id != null)
             {
-                user = await _dentalRepository.GetUserByOutId(id);
+                user = await _dentalRepository.GetUserByOutId((int)id);
             }
             else
             {
@@ -66,7 +66,9 @@ namespace DentalWeb.Controllers
                 user.City = userVM.City;
                 user.PostalCode = userVM.PostalCode;
 
-                if (_dentalRepository.Update(user))
+                var bRes = await _dentalRepository.Update(user);
+
+                if (bRes)
                 {
                     return RedirectToAction("Index", new { user.OutUserId });
                 }

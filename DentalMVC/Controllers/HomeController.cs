@@ -1,6 +1,6 @@
 ﻿using DentalBusiness.Interfaces;
 using DentalDomain.Models;
-using DentalBusiness.Repository;
+using DentalBusiness.Logic;
 using DentalWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,9 +14,9 @@ namespace DentalWeb.Controllers
     {
         private readonly UserManager<UserModel> _userManager;
         private readonly ILogger<HomeController> _logger;
-        private readonly IDentalBusinessRepository _dentalReposiotry;
+        private readonly IDentalBL _dentalReposiotry;
 
-        public HomeController(UserManager<UserModel> userManager, ILogger<HomeController> logger, IDentalBusinessRepository dentalRepository)
+        public HomeController(UserManager<UserModel> userManager, ILogger<HomeController> logger, IDentalBL dentalRepository)
         {
             _logger = logger;
             _dentalReposiotry = dentalRepository;
@@ -40,25 +40,21 @@ namespace DentalWeb.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Patients(string? filterPatients)
+        public async Task<IActionResult> Patients(int? id, string? filterPatients)
         {
-            UserModel user = await _userManager.GetUserAsync(User);
-
-            if(user == null)
+            if(id == null)
             {
-                return RedirectToAction("Login", "Account");
-            }
+                UserModel user = await _userManager.GetUserAsync(User);
 
-            IEnumerable<PatientModel> lsPatients;
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
 
-            if (await _userManager.IsInRoleAsync(user, "Admin"))
-            {
-                lsPatients = await _dentalReposiotry.GetAllPatients();
-            }
-            else
-            {
-                lsPatients = await _dentalReposiotry.GetAllPatients(user.OutUserId);
-            }
+                id = user.OutUserId;
+            }                      
+
+            IEnumerable<PatientModel> lsPatients = await _dentalReposiotry.GetAllPatients((int)id);
 
             if (!string.IsNullOrEmpty(filterPatients))
             {

@@ -4,55 +4,68 @@
 @{
     ViewData["Title"] = "Detail";
 }
+<div class="container">
+    <div class="row">
+        <div class="form-signin col-md-6 justify-content-center mx-auto" style="width: 400px;">
+            <div class="justify-content-center mx-auto">
+                <h2 class="align-content-md-start">@Model.Name @Model.Surname</h2>
+                <h2 class="align-content-md-start">ID: @Model.OutUserId</h2>
+                    <form method="post" asp-action="Index">
+                        <input type="hidden" class="form-control" id="OutUserId" asp-for="OutUserId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<div class="form-signin justify-content-center mx-auto" style="width: 300px;">
-    <div class="justify-content-center mx-auto">
-        <h2 class="align-content-md-start">@Model.Name @Model.Surname - @Model.OutUserId</h2>
-            <form method="post" asp-action="Index">
-                <input type="hidden" class="form-control" id="OutUserId" asp-for="OutUserId" />
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
 
-                <div class="form-group">
-                    <label asp-for="Name" class="control-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
+                        <div class="form-group">
+                            <label asp-for="Surname" class="control-label"></label>
+                            <input asp-for="Surname" class="form-control" />
+                            <span asp-validation-for="Surname" class="text-danger"></span>
+                        </div>                
 
-                <div class="form-group">
-                    <label asp-for="Surname" class="control-label"></label>
-                    <input asp-for="Surname" class="form-control" />
-                    <span asp-validation-for="Surname" class="text-danger"></span>
-                </div>                
+                        <div class="form-group">
+                            <label asp-for="City" class="control-label"></label>
+                            <select asp-for="City" class="form-select" asp-items="@Model.SelectCities"></select>
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
 
-                <div class="form-group">
-                    <label asp-for="City" class="control-label"></label>
-                    <select asp-for="City" class="form-select" asp-items="@Model.SelectCities"></select>
-                    <span asp-validation-for="City" class="text-danger"></span>
-                </div>
+                        <div class="form-group">
+                            <label asp-for="PostalCode" class="control-label"></label>
+                            <select asp-for="PostalCode" class="form-select" asp-items="@Model.SelectPostalCode"></select>
+                            <span asp-validation-for="PostalCode" class="text-danger"></span>
+                        </div>
 
-                <div class="form-group">
-                    <label asp-for="PostalCode" class="control-label"></label>
-                    <select asp-for="PostalCode" class="form-select" asp-items="@Model.SelectPostalCode"></select>
-                    <span asp-validation-for="PostalCode" class="text-danger"></span>
-                </div>
+                        <div class="form-group">
+                            <label asp-for="Street" class="control-label"></label>
+                            <input asp-for="Street" class="form-control" />
+                            <span asp-validation-for="Street" class="text-danger"></span>
+                        </div>
 
-                <div class="form-group">
-                    <label asp-for="Street" class="control-label"></label>
-                    <input asp-for="Street" class="form-control" />
-                    <span asp-validation-for="Street" class="text-danger"></span>
-                </div>
+                        <div class="form-group">
+                            <label asp-for="EmailAddress" class="control-label"></label>
+                            <input asp-for="EmailAddress" class="form-control" readonly="readonly"/>
+                            <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                        </div>
 
-                <div class="form-group">
-                    <label asp-for="EmailAddress" class="control-label"></label>
-                    <input asp-for="EmailAddress" class="form-control" readonly="readonly"/>
-                    <span asp-validation-for="EmailAddress" class="text-danger"></span>
-                </div>
-
-                <div class="form-group py-2">
-                    <input class="btn btn-primary float-right" type="submit" value="Update"/>
-                    <a class="btn btn-secondary" asp-controller="Home" asp-action="Users">Cancel</a>
-                </div>
-            </form>
+                        <div class="form-group py-2">
+                            <input class="btn btn-primary float-right" type="submit" value="Update"/>
+                            <a class="btn btn-secondary" asp-controller="Home" asp-action="Users">Cancel</a>
+                        </div>
+                    </form>
+            </div>    
+        </div>
+    @if (User.IsInRole("Admin"))
+    {
+            <div class="justify-content-end col-sm-1 mx-auto">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-route-id="@Model.OutUserId" asp-action="Patients">
+                <svg class="bi pe-none me-2" width="16" height="16"></svg>
+                Patients
+            </a>
+        </div>
+    }
     </div>
 </div>
 

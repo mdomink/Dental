@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DentalBusinesss\DentalBusiness.csproj" />
+    <ProjectReference Include="..\DentalBusinesss\DentalBusinessLogic.csproj" />
   </ItemGroup>
 
 </Project>

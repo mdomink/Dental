@@ -8,5 +8,10 @@ namespace DentalWeb
         {
             return user.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
+
+        public static bool IsInRole(this ClaimsPrincipal claimPrincipal, params string[] roles)
+        {
+            return roles.Any(r => claimPrincipal.IsInRole(r));
+        }
     }
 }

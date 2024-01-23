@@ -11,10 +11,10 @@ namespace DentalWeb.Controllers
     [Authorize]
     public class DentalScanController : Controller
     {
-        private readonly IDentalBusinessRepository _dentalBusiness;
+        private readonly IDentalBL _dentalBusiness;
         private readonly UserManager<UserModel> _userManager;
 
-        public DentalScanController(UserManager<UserModel> userManager, IDentalBusinessRepository dentalRepository)
+        public DentalScanController(UserManager<UserModel> userManager, IDentalBL dentalRepository)
         {
             _dentalBusiness = dentalRepository;
             _userManager = userManager;
@@ -38,7 +38,7 @@ namespace DentalWeb.Controllers
                     return RedirectToAction("Error", "Home", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
                 }
 
-                dentalScan = await _dentalBusiness.GetDentalScanById(dentalId, user.OutUserId);
+                dentalScan = await _dentalBusiness.GetDentalScanById(dentalId);
             }            
 
             if (dentalScan == null)
@@ -59,24 +59,23 @@ namespace DentalWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(PatientViewModel patientVM)
+        public async Task<IActionResult> Create(PatientViewModel patientVM)
         {
             if (!ModelState.IsValid)
             {
                 RedirectToAction("Index", "Patient", new { patientVM.Id });
             }
 
-            if (!User.IsInRole("Admin"))
-            {
-                var user = _userManager.GetUserAsync(User).Result;
+            //if (!User.IsInRole("Admin"))
+            //{
+            //    var user = _userManager.GetUserAsync(User).Result;
 
-                if (patientVM.OutUserId != user.OutUserId)
-                {
-                    TempData["Error"] = "Failed to crete new scan";
-
-                    return RedirectToAction("Index", "Patient", new { patientVM.Id });
-                }
-            }
+            //    if (patientVM.OutUserId != user.OutUserId)
+            //    {
+            //        TempData["Error"] = "Failed to crete new scan";
+            //        return RedirectToAction("Index", "Patient", new { patientVM.Id });
+            //    }
+            //}
 
             DateTime dtNow = DateTime.Now;
 
@@ -87,7 +86,9 @@ namespace DentalWeb.Controllers
                 PatientId = patientVM.Id
             };
 
-            if (!_dentalBusiness.Add(dentalScan, (int)patientVM.OutUserId))
+            var res = await _dentalBusiness.Add(dentalScan, (int)patientVM.OutUserId);
+
+            if (!res)
             {
                 TempData["Error"] = "Failed to crete new scan";
 
